@@ -8,11 +8,12 @@ import (
 
 func main() {
 
+	config.ReadEnv()
 	config.ConnectDB()
 	defer config.CloseDB()
 
 	models.Init()
 
 	router := routers.SetupRouter()
-	router.Run(":8080")
+	router.Run(":" + config.ServerPort)
 }

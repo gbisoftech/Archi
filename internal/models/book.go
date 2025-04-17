@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"log"
+	"main/global/file"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,16 +13,24 @@ import (
 
 type Book struct {
 	gorm.Model
-	ID        string    `form:"id"`
-	Title     string    `form:"title"`
-	Author    string    `form:"author"`
-	Quantity  int       `form:"quantity"`
-	UserID    string    `form:"user_id" gorm:"foreignKey:UserID"`
+	ID        string `form:"id"`
+	Title     string `form:"title"`
+	Author    string `form:"author"`
+	Quantity  int    `form:"quantity"`
+	UserID    string `form:"user_id" gorm:"foreignKey:UserID"`
+	Filename  string
 	CreatedAt time.Time `form:"created_at"`
 	UpdatedAt time.Time `form:"updated_at"`
 }
 
 func (b *Book) BeforeCreate(c *gin.Context) error {
+	savedFilename, err := file.UploadFile(c, "bookimage")
+	if err != nil {
+		savedFilename = "_noFile"
+	}
+
+	b.Filename = savedFilename
+
 	b.ID = uuid.New().String()
 	userID, exists := c.Get("userID")
 	if !exists {
